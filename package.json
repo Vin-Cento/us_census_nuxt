@@ -12,6 +12,9 @@
   "dependencies": {
     "@mdi/font": "^7.4.47",
     "@nuxt/fonts": "^0.7.1",
+    "@nuxtjs/leaflet": "^1.0.14",
+    "leaflet": "^1.9.4",
+    "leaflet-draw": "^1.0.4",
     "nuxt": "^3.12.3",
     "vue": "latest"
   },

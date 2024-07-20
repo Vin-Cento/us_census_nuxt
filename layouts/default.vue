@@ -2,7 +2,7 @@
   <v-app>
     <v-app-bar :elevation="2">
       <v-app-bar-title class="title">
-        <NuxtLink to="/">
+        <NuxtLink class="title" to="/">
           {{ title }}
         </NuxtLink>
       </v-app-bar-title>
@@ -16,9 +16,7 @@
       </div>
     </v-app-bar>
     <v-main>
-      <v-container>
-        <slot />
-      </v-container>
+      <slot />
     </v-main>
   </v-app>
 </template>
@@ -39,16 +37,16 @@ body {
 }
 
 .pagelinks.router-link-active {
-  font-family: "Helvetica Bold";
-  color: green;
-}
-
-.title {
-  font-family: "Helvetica Bold Rounded";
+  color: #8cc85f;
 }
 
 a {
   text-decoration: none;
-  /* color: cyan; */
+  color: #80a0ff;
+}
+
+.title {
+  color: white;
+  font-family: "Helvetica Bold Rounded";
 }
 </style>
