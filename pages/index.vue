@@ -3,7 +3,8 @@
     <v-row class="fill-height elevation-0" id='map'>
     </v-row>
     <v-row class="pl-10">
-      <v-btn @click="getDraw">jadon is stupid click me</v-btn>
+      <v-btn @click="getDraw">get polygon</v-btn>
+      <v-btn @click="resetMap">reset map</v-btn>
     </v-row>
   </v-container>
 </template>
@@ -21,16 +22,17 @@ const zoom = ref(13)
 const coor = ref([33.448376, -112.074036])
 const drawnItems = ref(new L.FeatureGroup);
 const polygon = ref([]);
+const map = ref(null);
 
 onMounted(() => {
-  var map = L.map('map').setView(coor.value, zoom.value);
+  map.value = L.map('map').setView(coor.value, zoom.value);
   // Add a tile layer to the map
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-  }).addTo(map);
+  }).addTo(map.value);
 
   // Initialize the FeatureGroup to store editable layers
-  map.addLayer(drawnItems.value);
+  map.value.addLayer(drawnItems.value);
 
   // Initialize the draw control and pass it the FeatureGroup of editable layers
   var drawControl = new L.Control.Draw({
@@ -46,9 +48,9 @@ onMounted(() => {
       circlemarker: false,
     }
   });
-  map.addControl(drawControl);
+  map.value.addControl(drawControl);
   // Handle the creation of new shapes
-  map.on(L.Draw.Event.CREATED, (event: any) => {
+  map.value.on(L.Draw.Event.CREATED, (event: any) => {
     console.log(event.layer)
     console.log('event.layer.latlngs', event.layer._latlngs)
     const layer = event.layer;
@@ -62,6 +64,14 @@ function getDraw() {
   for (const [key, value] of Object.entries(polygon)) {
     console.log(key, value)
   }
+}
+
+function getMap() {
+  map.value.setView([0, 0], 0);
+}
+
+function resetMap() {
+  map.value.setView(coor.value, zoom.value);
 }
 
 </script>
