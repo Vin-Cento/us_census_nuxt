@@ -6,7 +6,6 @@
       <v-col cols="2 pl-10">
         <v-btn @click="getTract">getTract</v-btn>
         <v-btn @click="getDraw">getDraw</v-btn>
-        <v-btn @click="getRes">getRes</v-btn>
         <v-btn @click="deleteDraw">deleteDraw</v-btn>
       </v-col>
     </v-row>
@@ -30,9 +29,20 @@ const drawnItems = ref(new L.FeatureGroup);
 const polygon = ref([]);
 const map = ref(null);
 let res = ref(null)
+const mapLayer = ref(new L.FeatureGroup())
+const defaultStyle = {
+  color: '#3388ff', // Default border color
+  weight: 3,
+  fillOpacity: 0.2,
+};
+const highlightStyle = {
+  color: '#ff7800', // Highlight border color on hover
+  weight: 5,
+};//
 
 onMounted(() => {
   map.value = L.map('map').setView(coor.value, zoom.value);
+  map.value.addLayer(mapLayer.value);
   // Add a tile layer to the map
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -107,7 +117,6 @@ async function getTract() {
   let features: any[] = []
   let polygons = drawnItems._rawValue._layers
   for (const [key, value] of Object.entries(polygons)) {
-    console.log(key, value)
     let featureTemplate = {
       type: "Feature", properties: {}, geometry: {
         coordinates: [],
@@ -134,11 +143,23 @@ async function getTract() {
       'Content-Type': 'application/json'
     }
   })
-  console.log('geojson', data.data[0])
-  console.log('geojson', data.data[0].geometry)
-  let group = new L.FeatureGroup();
-  group.addLayer(L.geoJson(data.data[0].geometry))
-  map.value.addLayer(group);
+  data.data.forEach((polygon: any) => {
+    console.log('polygon', polygon)
+    let layer = L.geoJson(polygon.geometry).bindTooltip(function (layer) {
+      let popUp = `<h3>State: ${polygon.state}</h3><br><h3>Code: ${polygon.censuscode}</h3>`
+      return popUp
+    })
+
+    layer.on('mouseover', function (e) {
+      e.target.setStyle(highlightStyle);
+    });
+    // Add mouseout event listener that reverts back original/default styling once no longer hovered over.
+    layer.on('mouseout', function (e) {
+      e.target.setStyle(defaultStyle);
+    });
+    mapLayer.value.addLayer(layer)
+  })
+  drawnItems.value.clearLayers()
   console.log('add layer')
 }
 
