@@ -1,6 +1,6 @@
 <template>
-  <v-container class="fill-height ma-0 w-100">
-    <Map/>
+  <v-container class="fill-height fill-width ma-0 pa-0" fluid>
+    <Map />
   </v-container>
 </template>
 

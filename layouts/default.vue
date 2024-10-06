@@ -15,7 +15,7 @@
         </v-sheet>
       </div>
     </v-app-bar>
-    <v-main>
+    <v-main width="100vw" style="display: flex; justify-content: center; align-items: center">
       <slot />
     </v-main>
   </v-app>
@@ -38,6 +38,7 @@ body {
 
 .pagelinks.router-link-active {
   color: #8cc85f;
+  font-weight: bolder;
 }
 
 a {

@@ -1,15 +1,5 @@
 <template>
-  <v-container class="fill-height w-100 ma-0">
-    <v-row class="fill-height w-100">
-      <v-col id='map' class="w-100" cols="16">
-      </v-col>
-      <v-col cols="2 pl-10">
-        <v-btn @click="getTract">getTract</v-btn>
-        <v-btn @click="getDraw">getDraw</v-btn>
-        <v-btn @click="deleteDraw">deleteDraw</v-btn>
-      </v-col>
-    </v-row>
-  </v-container>
+  <div id="map" class="fill-height w-100"></div>
 </template>
 
 <script setup lang="ts">
@@ -38,6 +28,7 @@ const defaultStyle = {
 const highlightStyle = {
   color: '#ff7800', // Highlight border color on hover
   weight: 5,
+  fillOpacity: 0.7,
 };//
 
 onMounted(() => {
@@ -77,6 +68,7 @@ onMounted(() => {
     const layer = event.layer;
     drawnItems.value.addLayer(layer);
     polygon.value.push(layer._latlngs)
+    getTract()
   });
   map.value.on(L.Draw.Event.DELETED, (event: any) => {
     console.log('deleted')
@@ -145,7 +137,7 @@ async function getTract() {
   })
   data.data.forEach((polygon: any) => {
     console.log('polygon', polygon)
-    let layer = L.geoJson(polygon.geometry).bindTooltip(function (layer) {
+    let layer = L.geoJson(polygon.geometry).bindTooltip(function (_) {
       let popUp = `<h3>State: ${polygon.state}</h3><br><h3>Code: ${polygon.censuscode}</h3>`
       return popUp
     })
