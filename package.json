@@ -13,13 +13,19 @@
     "@mdi/font": "^7.4.47",
     "@nuxt/fonts": "^0.7.1",
     "@nuxtjs/leaflet": "^1.0.14",
+    "@pinia/nuxt": "^0.5.4",
+    "@types/leaflet-draw": "^1.0.11",
+    "axios": "^1.7.7",
     "leaflet": "^1.9.4",
     "leaflet-draw": "^1.0.4",
     "nuxt": "^3.12.3",
+    "pinia": "^2.2.2",
     "vue": "latest"
   },
   "packageManager": "pnpm@9.4.0+sha512.f549b8a52c9d2b8536762f99c0722205efc5af913e77835dbccc3b0b0b2ca9e7dc8022b78062c17291c48e88749c70ce88eb5a74f1fa8c4bf5e18bb46c8bd83a",
   "devDependencies": {
+    "@nuxt/devtools": "^1.5.0",
+    "@types/leaflet": "^1.9.12",
     "vite-plugin-vuetify": "^2.0.3",
     "vuetify": "^3.6.11"
   }

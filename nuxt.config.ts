@@ -14,6 +14,8 @@ export default defineNuxtConfig({
     },
     '@nuxt/fonts',
     '@nuxtjs/leaflet',
+    '@pinia/nuxt',
+    '@nuxt/devtools',
   ],
   vite: {
     vue: {
@@ -36,7 +38,7 @@ export default defineNuxtConfig({
     }
   },
   devtools: { enabled: true },
-  compatibilityDate: '2024-07-04',
+  compatibilityDate: '2024-07-22',
   routeRules: {
     '/': {
       ssr: false,
