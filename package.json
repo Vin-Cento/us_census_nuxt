@@ -12,12 +12,14 @@
   "dependencies": {
     "@mdi/font": "^7.4.47",
     "@nuxt/fonts": "^0.7.1",
+    "@nuxt/types": "^2.18.1",
     "@nuxtjs/leaflet": "^1.0.14",
-    "@pinia/nuxt": "^0.5.4",
+    "@pinia/nuxt": "^0.5.5",
     "@types/leaflet-draw": "^1.0.11",
     "axios": "^1.7.7",
     "leaflet": "^1.9.4",
     "leaflet-draw": "^1.0.4",
+    "lodash": "^4.17.21",
     "nuxt": "^3.12.3",
     "pinia": "^2.2.2",
     "vue": "latest"

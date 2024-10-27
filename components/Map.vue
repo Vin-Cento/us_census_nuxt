@@ -1,5 +1,7 @@
 <template>
-  <div id="map" class="fill-height w-100"></div>
+  <div class="fill-height w-100">
+    <div id="map" class="fill-height w-100" style="z-index: 1;"></div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -8,36 +10,30 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw';
 import 'leaflet-draw/dist/leaflet.draw.css';
-import axios from 'axios';
+import { incomeHash, incomeNumberHash, incomeAverageHash, defaultStyle, highlightStyle } from '../constants/constants'
+import { useMaps } from "../stores/map"
+import { storeToRefs } from 'pinia'
 
 // @ts-ignore
 window.type = 'any';
 
+let mapState = storeToRefs(useMaps())
 const zoom = ref(13)
-const coor = ref([33.448376, -112.074036])
+const coor = ref(mapState.center)
 const drawnItems = ref(new L.FeatureGroup);
-const polygon = ref([]);
+const mapPolygon = ref([]);
 const map = ref(null);
-let res = ref(null)
-const mapLayer = ref(new L.FeatureGroup())
-const defaultStyle = {
-  color: '#3388ff', // Default border color
-  weight: 3,
-  fillOpacity: 0.2,
-};
-const highlightStyle = {
-  color: '#ff7800', // Highlight border color on hover
-  weight: 5,
-  fillOpacity: 0.7,
-};//
+const censusLayer = ref(new L.FeatureGroup())
+
+watch(mapState.center, async (newCenter: any[],) => {
+  map.value.setView([newCenter[0], newCenter[1]], 10);
+})
 
 onMounted(() => {
   map.value = L.map('map').setView(coor.value, zoom.value);
-  map.value.addLayer(mapLayer.value);
+  map.value.addLayer(censusLayer.value);
   // Add a tile layer to the map
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-  }).addTo(map.value);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {}).addTo(map.value);
 
   // Initialize the FeatureGroup to store editable layers
   map.value.addLayer(drawnItems.value);
@@ -61,45 +57,17 @@ onMounted(() => {
   // Handle the creation of new shapes
   // https://leaflet.github.io/Leaflet.draw/docs/leaflet-draw-latest.html
   map.value.on(L.Draw.Event.CREATED, (event: any) => {
-    console.log('created')
-    console.log(event)
     // console.log(event.layer)
-    console.log('event.layer.latlngs', event.layer._latlngs)
     const layer = event.layer;
     drawnItems.value.addLayer(layer);
-    polygon.value.push(layer._latlngs)
-    getTract()
+    mapPolygon.value.push(layer._latlngs)
+    getTract(censusLayer)
   });
-  map.value.on(L.Draw.Event.DELETED, (event: any) => {
-    console.log('deleted')
-    console.log(event)
-  });
+  map.value.on(L.Draw.Event.DELETED, (event: any) => { });
 })
 
-async function getDraw() {
-  // @ts-ignore
-  res.value = await $fetch('/api/censustract', {
-    method: 'post',
-    body: { test: 123 }
-  })
-  // console.log('drawnItems', drawnItems)
-  // console.log('drawnItems.value', drawnItems.value)
-  // console.log('drawnItems.value.leaflet_id', drawnItems.value._leaflet_id)
-  let polygon = drawnItems._rawValue._layers
-  for (const [key, value] of Object.entries(polygon)) {
-    console.log(key, value)
-  }
-}
-
-// function getMap() {
-//   map.value.setView([0, 0], 0);
-// }
-
-async function deleteDraw() {
-  drawnItems.value.clearLayers();
-}
-
-async function getTract() {
+async function getTract(censusLayer: any) {
+  censusLayer.value.clearLayers()
   let res = {
     boundary: {
       type: "FeatureCollection",
@@ -119,7 +87,7 @@ async function getTract() {
     // @ts-ignore
     value._latlngs.forEach((coors: any) => {
       coors.forEach((coor: any) => {
-        console.log(coor.lng, coor.lat)
+        // console.log(coor.lng, coor.lat)
         coordinates.push([coor.lng, coor.lat])
       })
     })
@@ -130,17 +98,61 @@ async function getTract() {
   }
   // @ts-ignore
   res.boundary.features = features
-  let data = await axios.post('http://localhost:8080/tracts/within-boundary', res, {
+  const { data, error } = await useFetch('http://localhost:8080/tracts/income', {
+    method: 'POST',
+    // @ts-ignore
     headers: {
       'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(res)
+  });
+  data.value.forEach((mapPolygon: any) => {
+    let avgIncome: any = mapPolygon.income.B19301_001E
+    let avgIncomeHash: string = ''
+    if (avgIncome != '$0.00' && avgIncome) {
+      let avgIncomeNumber: number = Number(avgIncome.replaceAll(',', '').replaceAll('$', ''))
+      if (0 < avgIncomeNumber && avgIncomeNumber <= 100000) {
+        avgIncomeNumber = Math.ceil(avgIncomeNumber / 10000) * 10000;
+        avgIncomeHash = String(avgIncomeNumber);
+      }
+      else if (100000 < avgIncomeNumber && avgIncomeNumber <= 125000) {
+        avgIncomeHash = String(125000)
+      }
+      else if (125000 < avgIncomeNumber && avgIncomeNumber <= 150000) {
+        avgIncomeHash = String(150000)
+      }
+      else if (150000 < avgIncomeNumber && avgIncomeNumber <= 200000) {
+        avgIncomeHash = String(200000)
+      }
+      else if (200000 < avgIncomeNumber && avgIncomeNumber <= 250000) {
+        avgIncomeHash = String(250000)
+      }
+      else if (300000 < avgIncomeNumber && avgIncomeNumber <= 400000) {
+        avgIncomeHash = String(400000)
+      }
+      else if (400000 < avgIncomeNumber && avgIncomeNumber <= 500000) {
+        avgIncomeHash = String(500000)
+      }
+      else if (500000 < avgIncomeNumber && avgIncomeNumber <= 600000) {
+        avgIncomeHash = String(600000)
+      }
+      else if (600000 < avgIncomeNumber && avgIncomeNumber <= 700000) {
+        avgIncomeHash = String(700000)
+      }
+      else if (700000 < avgIncomeNumber && avgIncomeNumber <= 1000000) {
+        avgIncomeHash = String(1000000)
+      }
+    } else {
+      avgIncomeHash = "NA"
     }
-  })
-  data.data.forEach((polygon: any) => {
-    console.log('polygon', polygon)
-    let layer = L.geoJson(polygon.geometry).bindTooltip(function (_) {
-      let popUp = `<h3>State: ${polygon.state}</h3><br><h3>Code: ${polygon.censuscode}</h3>`
+
+    let layer = L.geoJson(mapPolygon.geometry).bindTooltip(function (_) {
+      // @ts-ignore
+      let popUp = `<h5>State: ${mapPolygon.state}</h5><br><h5>County: ${mapPolygon.county}</h5><br><h5>Code: ${mapPolygon.censuscode}</h5><br><h5>Income: ${avgIncome}</h5><br><h5>Year: 2021</h5>`
       return popUp
     })
+    // @ts-ignore
+    layer.setStyle({ ...defaultStyle, ...{ fillColor: incomeAverageHash[String(avgIncomeHash)] } })
 
     layer.on('mouseover', function (e) {
       e.target.setStyle(highlightStyle);
@@ -149,10 +161,9 @@ async function getTract() {
     layer.on('mouseout', function (e) {
       e.target.setStyle(defaultStyle);
     });
-    mapLayer.value.addLayer(layer)
+    censusLayer.value.addLayer(layer)
   })
   drawnItems.value.clearLayers()
-  console.log('add layer')
 }
 
 function resetMap() {

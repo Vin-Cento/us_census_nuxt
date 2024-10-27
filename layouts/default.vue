@@ -15,7 +15,7 @@
         </v-sheet>
       </div>
     </v-app-bar>
-    <v-main width="100vw" style="display: flex; justify-content: center; align-items: center">
+    <v-main class="d-flex justify-center">
       <slot />
     </v-main>
   </v-app>
